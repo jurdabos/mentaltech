@@ -20,15 +20,26 @@ It is a pure Python project developed in Pycharm.
 
 ## Installation
 
-1.	Open your preferred IDE
-2.	Open project MentalTech
-3.	Launch a terminal session
-4.
+Open your preferred IDE
+Open project MentalTech
+Launch a terminal session
+
 ```shell
 conda activate MentalTech
+```
 
-5.	conda update -n base -c defaults conda
-6.  conda env create -f environment.yml OR conda env update --file environment.yml --prune 8.	conda list
+```shell
+conda env create -f environment.yml
+```
+OR
+```shell
+conda env update --file environment.yml --prune
+```
+
+```shell
+conda list
+```
+
 ```shell
 pip install -r requirements.txt
 ```
