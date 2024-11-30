@@ -21,6 +21,7 @@ plt.ylabel('Number of Employees')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+plt.close()
 
 # %%
 # B: The composition of the managerial circle
@@ -28,17 +29,11 @@ labels = ['Reg. Finance', 'Regional IT Managers', 'Regional HR Managers',
           'Reg. Comms', 'Regional Directors', 'CEO', 'CTO', 'COO',
           'HQ Finance Director', 'HQ IT Director', 'HQ Communications Director', 'Head of Global HR']
 sizes = [6, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1, 1]
-
 plt.figure(figsize=(10, 6))
 plt.pie(sizes, labels=labels, startangle=140)
-# With added padding after the title
 plt.title('Managerial Circle Distribution', pad=20)
 plt.axis('equal')
-# Equal aspect ratio ensures that pie is drawn as a circle
-
-# Add the number of people in each role to the center of the pie chart
 total_people = sum(sizes)
 plt.text(0, 0, f'Total: {total_people}', ha='center', va='center', fontsize=14)
-
-# Show the pie chart
 plt.show()
+plt.close()

@@ -20,20 +20,25 @@ It is a pure Python project developed in Pycharm.
 
 ## Installation
 
-Open your preferred IDE<br>
-Open project MentalTech<br>
-Launch a terminal session<br>
+**Step 1: Set Up the Environment**<br>
+Open a terminal (Windows Terminal, Anaconda Prompt, or the terminal in your preferred IDE like PyCharm).<br>
+Run the following command to create the Conda environment:<br>
+```shell
+conda create --name my_new_env python=3.10
+```
+<br>
+Activate the environment:<br>
 
 ```shell
-conda activate MentalTech
+conda activate my_new_env
 ```
 
 ```shell
-conda env create -f environment.yml
+conda env create -f my_new_environment.yml
 ```
 OR
 ```shell
-conda env update --file environment.yml --prune
+conda env update --file my_new_environment.yml --prune
 ```
 
 ```shell

@@ -19,26 +19,26 @@ def cramers_v(x, y):
     r, k = contingency_table.shape
     return np.sqrt(phi2 / min(r - 1, k - 1))
 
-# I cannot get this to work – for some reason, if I put the function here, cm will be a float instead of a df
-# def drop_high_corr_features(cm, threshold, var_table):
-#     high_corr_pairs = []
-#     features_to_drop = []
-#     variance_dict = dict(zip(var_table['features'], var_table['variances']))
-#     for i in range(len(cm.columns)):
-#         for j in range(i):
-#             if abs(cm.iloc[i, j]) > threshold:
-#                 high_corr_pairs.append((cm.columns[i], cm.columns[j]))
-#
-#                 feature_i = cm.columns[i]
-#                 feature_j = cm.columns[j]
-#
-#                 # Use variance to decide which feature to drop
-#                 if variance_dict[feature_i] < variance_dict[feature_j]:
-#                     features_to_drop.append(feature_i)
-#                 else:
-#                     features_to_drop.append(feature_j)
-#
-#     return high_corr_pairs, features_to_drop
+
+def drop_high_corr_features(cm, threshold, var_table):
+    high_corr_pairs = []
+    features_to_drop = []
+    variance_dict = dict(zip(var_table['features'], var_table['variances']))
+    for i in range(len(cm.columns)):
+        for j in range(i):
+            if abs(cm.iloc[i, j]) > threshold:
+                high_corr_pairs.append((cm.columns[i], cm.columns[j]))
+
+                feature_i = cm.columns[i]
+                feature_j = cm.columns[j]
+
+                # Use variance to decide which feature to drop
+                if variance_dict[feature_i] < variance_dict[feature_j]:
+                    features_to_drop.append(feature_i)
+                else:
+                    features_to_drop.append(feature_j)
+
+    return high_corr_pairs, features_to_drop
 
 
 def missing_value_ratio(col):
