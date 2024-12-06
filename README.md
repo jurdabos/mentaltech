@@ -15,32 +15,16 @@ titled Mental Health in Technology-related Jobs at I’MMIGRATION.<br>
 For further elaboration, you can contact balazs.torda@iu-study.org.
 
 ## The basic building blocks
-
-It is a pure Python project developed in Pycharm.
+It is a pure Python project developed in Pycharm.<br>
 
 ## Installation
 
-**Step 1: Set Up the Environment**<br>
-Open a terminal (Windows Terminal, Anaconda Prompt, or the terminal in your preferred IDE like PyCharm).<br>
-Run the following command to create the Conda environment:<br>
-```shell
-conda create --name my_new_env python=3.10
-```
-<br>
-Activate the environment:<br>
+Note: Make sure you have Python 3.12 installed on your system.<br>
+Navigate to the project directory, then launch<br>
 
 ```shell
-conda activate my_new_env
+pip install -r requirements.txt
 ```
 
-```shell
-conda env create -f my_new_environment.yml
-```
-OR
-```shell
-conda env update --file my_new_environment.yml --prune
-```
-
-```shell
-conda list
-```
+## How to use it?
+Execute the code blocks one by one, and inspect the outputs.

@@ -1,0 +1,169 @@
+features,importance
+Treat_No,0.09982229419846239
+Leave_Don't know * Treat_No,0.08086093289669556
+Leave_Don't know + Leave_Very easy,0.047484927846170276
+MentvsPhys_Don't know * Treat_No,0.04669279478637064
+Leave_Don't know * MentvsPhys_Don't know,0.037837285530777906
+support_available * Treat_No,0.034453210812087305
+Leave_Don't know + Leave_Somewhat easy,0.033664814141490515
+Leave_Somewhat easy + Leave_Very easy,0.031932728040938815
+Age * Treat_No,0.0303903471063151
+Leave_Don't know * support_available,0.02944297508477604
+Anonymity_Don't know - Leave_Don't know,0.029173789317711567
+disc_MH_atwork + Leave_Don't know,0.027149152628370546
+FamHist_Yes * Leave_Don't know,0.02223152960963014
+MentvsPhys_Yes * Treat_No,0.02008547380136174
+PhysInt_Maybe * Treat_No,0.018699421067377046
+Leave_Don't know * PhysInt_Maybe,0.017723216133216736
+Leave_Somewhat easy * Treat_No,0.015145771499283082
+Continent_Americas * Treat_No,0.013425376642491391
+disc_MH_atwork * Treat_No,0.012495584393478414
+Anonymity_Don't know * MentvsPhys_Yes,0.009232811298545477
+MentInt_No * MentvsPhys_Yes,0.009062803910914874
+MentvsPhys_Yes * PhysInt_Maybe,0.00904876342978251
+FamHist_Yes,0.008848680219676957
+Leave_Somewhat easy * support_available,0.006857238943714975
+Continent_Americas * MentvsPhys_Yes,0.006734675277699312
+Leave_Very easy * Treat_No,0.006711297966075888
+Leave_Don't know * MentvsPhys_No,0.00671020627983035
+Anonymity_Don't know * MentInt_No,0.00653327362235799
+Age * Leave_Somewhat easy,0.0061067733112612245
+Anonymity_Don't know * Treat_No,0.005954719314309525
+Anonymity_Don't know,0.00592197492672687
+Leave_Somewhat easy * MentvsPhys_Don't know,0.005859889047421706
+Continent_Americas * Leave_Don't know,0.005730925887303318
+Leave_Very easy + MentInt_No,0.005728337453894629
+Leave_Don't know * PhysCons_No,0.005646122587525084
+Leave_Very easy - ObsCons_No,0.0056293950656121396
+PhysCons_No * Treat_No,0.005522982428173519
+MentvsPhys_No * Treat_No,0.005303353656980774
+Leave_Very easy + SelfEmp_No,0.004913863101334549
+Age * Anonymity_Don't know,0.004783934352349177
+Gen_male * Leave_Don't know,0.0046232638313929006
+MentvsPhys_Don't know * support_available,0.004611432255993725
+Anonymity_Don't know * Leave_Very easy,0.004475997343963958
+MentvsPhys_Yes * support_available,0.0044318069407036234
+Leave_Don't know * MentvsPhys_Yes,0.004383407565123952
+Age * MentvsPhys_Yes,0.004356316063300976
+Age - support_available,0.004336565610725705
+Leave_Don't know * Remote_No,0.004239719706073393
+Age * support_available,0.004098246789885169
+Remote_No * Treat_No,0.003911513673949696
+Leave_Very easy * support_available,0.0037495501274322166
+Anonymity_Don't know * support_available,0.0037048385087122744
+Anonymity_Don't know * Leave_Don't know,0.0036458032636509756
+Age * FamHist_Yes,0.0036381094596865298
+Leave_Very easy * PhysInt_Maybe,0.0035768385759063796
+FamHist_Yes * Leave_Somewhat easy,0.0033827618089595727
+FamHist_Yes * Treat_No,0.003376918380006393
+Age * Continent_Americas,0.0032862263958495525
+Age * MentvsPhys_Don't know,0.003090915203120591
+Age * disc_MH_atwork,0.0028884698406352522
+Continent_Americas - support_available,0.00286084562283224
+MentvsPhys_Yes - PhysCons_No,0.0028590800583204222
+Age * Remote_No,0.0027709307781333303
+Leave_Very difficult,0.002709245493244586
+disc_MH_atwork * Leave_Somewhat easy,0.002677540115802887
+PhysInt_Maybe * Remote_No,0.002644408011719323
+MentInt_No * support_available,0.002600810820361271
+Age * MentvsPhys_No,0.00256737605892987
+Anonymity_Don't know * Leave_Somewhat easy,0.002523325170924068
+disc_MH_atwork * support_available,0.0025177286169393554
+MentInt_No * PhysInt_Maybe,0.0024759057712096786
+FamHist_Yes * support_available,0.0024561880209212367
+Age * PhysInt_Maybe,0.002372557925180833
+disc_MH_atwork * MentvsPhys_Yes,0.0023388564515640906
+PhysInt_Maybe + PhysInt_Yes,0.002247623660210109
+Age * MentInt_No,0.0022427127319913356
+MentvsPhys_No * support_available,0.002202052059241853
+PhysInt_Maybe * support_available,0.0021431353212549163
+Leave_Somewhat easy * PhysInt_Maybe,0.0021103539667792818
+MentvsPhys_Yes * Remote_No,0.002088258909111212
+Gen_male + MentInt_No,0.0020074467195873294
+disc_MH_atwork * FamHist_Yes,0.0019922575043350233
+Age * Leave_Very easy,0.0019137890749574154
+Continent_Americas * Leave_Somewhat easy,0.0019046384018814122
+FamHist_Yes * MentvsPhys_No,0.0018877045890441674
+Remote_No * support_available,0.0018623738687556194
+Continent_Americas * support_available,0.001804692750120827
+Gen_male * support_available,0.0017884108656204402
+Anonymity_Don't know * FamHist_Yes,0.0017544617408245969
+MentInt_No * Remote_No,0.0017205700607643695
+Leave_Somewhat easy * MentvsPhys_Yes,0.0016897022585430602
+disc_MH_atwork * PhysInt_Maybe,0.0016138569757887954
+MentInt_No + ObsCons_No,0.0015662966773905078
+disc_MH_atwork * MentvsPhys_Don't know,0.0015291678410161843
+Leave_Somewhat easy * Remote_No,0.0015153828825531805
+Continent_Americas * PhysInt_Maybe,0.0015017495804536482
+Anonymity_Don't know * disc_MH_atwork,0.0014581290206609361
+FamHist_Yes * MentvsPhys_Don't know,0.0014302520787564587
+disc_MH_atwork * MentvsPhys_No,0.0014136603276208239
+Anonymity_Don't know * Continent_Americas,0.0014051977262408216
+disc_MH_atwork * Remote_No,0.0013787257369805048
+Leave_Don't know * PhysInt_Yes,0.0013260417160012613
+MentvsPhys_Don't know * PhysInt_Maybe,0.0013095834613593277
+FamHist_Yes * Leave_Very easy,0.0012806455563344106
+Age * PhysInt_Yes,0.0012657600626926294
+Age * Gen_male,0.0012488489096067939
+Continent_Americas * disc_MH_atwork,0.0012484948980554128
+PhysCons_No * support_available,0.0012473687053923845
+Age * PhysCons_No,0.0012414624020957055
+Continent_Americas + PhysInt_Maybe,0.0012318063775202661
+Anonymity_Don't know * MentvsPhys_No,0.0012141620217552206
+Continent_Americas * MentInt_No,0.0011941309841890279
+SelfEmp_No * support_available,0.0011688887224865616
+Age * SelfEmp_No,0.0011515875939367528
+Anonymity_Don't know * PhysInt_Maybe,0.001135353071878819
+Leave_Don't know * MentInt_No,0.00112176870989883
+Gen_male * Treat_No,0.0011187749529631172
+Continent_Americas * Remote_No,0.0011180662077823087
+PhysInt_Yes * Treat_No,0.001106413411919251
+FamHist_Yes * PhysInt_Maybe,0.0010720084867679497
+Continent_Americas * Leave_Very easy,0.0010626286403192186
+PhysInt_Maybe * SelfEmp_No,0.0010550868821827622
+SelfEmp_No * Treat_No,0.0010423724894933685
+PhysInt_Yes * support_available,0.0010230893076276196
+FamHist_Yes * ObsCons_No,0.0009550210245879825
+FamHist_Yes * MentvsPhys_Yes,0.0009545308112885461
+Continent_Americas * FamHist_Yes,0.0009478285218584325
+Anonymity_Don't know * Gen_male,0.0009323344431899609
+MentInt_No * PhysInt_Yes,0.0008911799948296533
+disc_MH_atwork * PhysCons_No,0.0008729985856910041
+Remote_No * SelfEmp_No,0.0008495289730056976
+Age * ObsCons_No,0.0008470687433822873
+Continent_Americas * PhysCons_No,0.0008363941909565285
+MentvsPhys_Don't know * PhysCons_No,0.0008148122024844371
+Anonymity_Don't know * MentvsPhys_Don't know,0.0007981034401766443
+Anonymity_Don't know * Remote_No,0.0007825244733582045
+FamHist_Yes * Gen_male,0.0007530757049593837
+MentvsPhys_No * PhysInt_Maybe,0.0007491157787222913
+PhysCons_No * PhysInt_Maybe,0.0007475032885363989
+Anonymity_Don't know * SelfEmp_No,0.0007223474889874635
+FamHist_Yes * PhysCons_No,0.000711363512290446
+MentvsPhys_Don't know * Remote_No,0.00070160818715451
+Continent_Americas * MentvsPhys_Don't know,0.0006734040264351844
+ObsCons_No * support_available,0.0006704170353354265
+MentInt_No * MentvsPhys_Don't know,0.0006565412240225216
+Anonymity_Don't know * PhysInt_Yes,0.0006498745691001556
+Continent_Americas * PhysInt_Yes,0.0006324858696565231
+Anonymity_Don't know * PhysCons_No,0.0005122544890727848
+Continent_Americas * MentvsPhys_No,0.0005056119987517096
+FamHist_Yes * Remote_No,0.0005053982441298335
+Continent_Americas * SelfEmp_No,0.0004758336627735128
+MentvsPhys_No * ObsCons_No,0.0004272350675490213
+FamHist_Yes * MentInt_No,0.000422613442436491
+PhysCons_No * Remote_No,0.0004093878732024803
+Gen_male * PhysInt_Maybe,0.0004057039669689547
+MentvsPhys_No * Remote_No,0.00036172687999343157
+Gen_male * PhysCons_No,0.0003528369927868111
+MentvsPhys_Don't know * PhysInt_Yes,0.0003507196506109601
+MentvsPhys_No * PhysCons_No,0.00031364427375380643
+Gen_male * MentvsPhys_Yes,0.00028899715767934087
+ObsCons_No * PhysInt_Maybe,0.0002772292034284841
+FamHist_Yes * PhysInt_Yes,0.0002671502077051953
+Gen_male * MentvsPhys_Don't know,0.0002536857573907926
+Gen_male * MentvsPhys_No,0.00021532023577867254
+Anonymity_Don't know * ObsCons_No,0.00017219241362291583
+ObsCons_No * PhysCons_No,0.0001586684742826448
+Continent_Americas * ObsCons_No,0.00015410376959794478
+Gen_male * Remote_No,0.00012552936607874288

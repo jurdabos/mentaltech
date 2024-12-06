@@ -2,7 +2,6 @@
 
 # Standard library imports
 from datetime import datetime
-from docx import Document
 from hdbscan import HDBSCAN
 import heapq
 import helper
@@ -24,19 +23,21 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # Machine learning and clustering
 from sklearn import datasets, manifold, mixture
-from sklearn.cluster import AgglomerativeClustering, KMeans
+from sklearn.cluster import AgglomerativeClustering, DBSCAN, KMeans
 from sklearn.datasets import load_digits
 from sklearn.decomposition import PCA
-from sklearn.ensemble import ExtraTreesRegressor, IsolationForest
+from sklearn.ensemble import ExtraTreesRegressor, IsolationForest, RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_selection import f_classif, SelectKBest, VarianceThreshold
 from sklearn.impute import SimpleImputer
+from sklearn.inspection import permutation_importance
 from sklearn.linear_model import BayesianRidge, LogisticRegression
 from sklearn.manifold import MDS
 from sklearn.metrics import silhouette_score
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import (
-    LabelEncoder, PolynomialFeatures, QuantileTransformer, RobustScaler
+    LabelEncoder, MinMaxScaler, PolynomialFeatures, QuantileTransformer, RobustScaler
 )
 
 # Feature engineering and automation
@@ -60,8 +61,7 @@ cmap = sns.diverging_palette(220, 10, as_cmap=True)
 
 # %%
 # Loading the data
-data = pd.read_csv('D:/Tanulás/iu/Subjects/Machine Learning - Unsupervised Learning and Feature Engineering/'
-                   '/Kaggledata/survey.csv')
+data = pd.read_csv('./data/survey.csv')
 
 # %%
 # Getting preliminary info
@@ -76,8 +76,7 @@ plt.title("Diagnosed with a mental health condition by a health care professiona
 plt.xlabel("Response", fontsize=12)
 plt.ylabel("Number of respondents", fontsize=12)
 plt.xticks(rotation=45)
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/mhdiag.png')
+plt.show()
 plt.close()
 
 # %%
@@ -86,12 +85,12 @@ columns_to_drop = [col for col in data.columns if helper.missing_value_ratio(dat
 data.drop(columns_to_drop, axis=1, inplace=True)
 
 # %%
-# Dropping irrelevant columns based on domain knowledge (cf. case study)
-data.drop(['Timestamp', 'no_employees', 'tech_company'], axis=1, inplace=True)
+# Dropping the rows with NMAR missing values
+data.dropna(subset=['self_employed'], inplace=True)
 
 # %%
-# Dropping the rows with NMAR missing values (cf. case study)
-data.dropna(subset=['self_employed'], inplace=True)
+# Dropping irrelevant columns based on domain knowledge (cf. case study)
+data.drop(['Timestamp', 'no_employees', 'tech_company'], axis=1, inplace=True)
 
 # %%
 # Analyzing the age column
@@ -104,10 +103,9 @@ sns.histplot(data=data_age, x="Age")
 plt.title("Age distribution without outliers", fontsize=14)
 plt.xlabel("Age", fontsize=12)
 plt.ylabel("Frequency", fontsize=12)
-# Saving the figure to a .png file
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/Age_no_outliers.png')
-# plt.show()
+plt.show()
 plt.close()
+
 # %%
 # Dropping the rows with unreliable entries where 'Age' is less than 14 or greater than 100
 data = data[(data['Age'] >= 14) & (data['Age'] <= 100)]
@@ -136,7 +134,6 @@ data.loc[data.Gender.isin(male), 'Gender'] = 'male'
 data.loc[data.Gender.isin(female), 'Gender'] = 'female'
 data.loc[data.Gender.isin(other), 'Gender'] = 'other'
 gender_values = data.Gender.value_counts().sort_values(ascending=False).to_frame()
-# DA again
 gender_values = gender_values.rename(columns={'Gender': 'count'})
 print(gender_values)
 
@@ -163,8 +160,8 @@ ax.set_title('Top 15 Countries', fontsize=16)
 ax.set_xlabel('Country', fontsize=14)
 ax.set_ylabel('Count', fontsize=14)
 plt.tight_layout()
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/Top_15_countries.png')
+plt.show()
+plt.close()
 
 # %%
 # Transforming "Country" column
@@ -205,7 +202,8 @@ plt.xticks(rotation=45, ha='center', fontsize=9)
 plt.yticks(rotation=0, ha='right', fontsize=10)
 plt.tight_layout()
 plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/cramers.png')
-# plt.show()
+plt.show()
+plt.close()
 
 # %%
 # Getting a printout of the unique values in benefits, care_options, seek_help and wellness_program
@@ -263,9 +261,9 @@ data.drop(['coworkers', 'mental_health_consequence', 'supervisor'], axis=1, inpl
 
 # %%
 # Saving the altered data table after categorical feature selection
-filename = f'''C:/Users/jurda/PycharmProjects/MentalTech/data_versions/survey_aftercfs_{datetime.now().strftime(
-    "%Y%m%d_%H%M%S")}.csv'''
-data.to_csv(filename, index=False)
+# filename = f'''./data_versions/survey_aftercfs_{datetime.now().strftime(
+#     "%Y%m%d_%H%M%S")}.csv'''
+# data.to_csv(filename, index=False)
 
 # %%
 # Creating an informative summary DataFrame for categorical features before one-hot encoding
@@ -279,8 +277,8 @@ print(tabulate.tabulate(cat_summary, headers='keys', tablefmt='pretty'))
 
 # %%
 # Function call to add a grid-based table to Word for case study
-helper.save_as_word_table(cat_summary,
-                          "C:/Users/jurda/PycharmProjects/MentalTech/data_versions/categorical_summary_with_grid.docx")
+# helper.save_as_word_table(cat_summary,
+#                           "./data_versions/categorical_summary_with_grid.docx")
 
 # %%
 # Starting 1HE by specifying categorical columns for memory and performance benefits
@@ -306,10 +304,9 @@ data_encoded.drop(columns=categorical_columns, inplace=True, errors='ignore')
 
 # %%
 # Converting everything to float and saving the altered data table
-data_encoded_float = data_encoded.astype('float64')
-filename = f'''C:/Users/jurda/PycharmProjects/MentalTech/data_versions/survey_afterhotenc_{datetime.now().strftime(
-    "%Y%m%d_%H%M%S")}.csv'''
-data_encoded_float.to_csv(filename, index=False)
+# data_encoded_float = data_encoded.astype('float64')
+# filename = f'''./data_versions/survey_afterhotenc_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'''
+# data_encoded_float.to_csv(filename, index=False)
 
 # %%
 # Verifying the resulting dataframe
@@ -332,16 +329,12 @@ print(tabulate.tabulate(summary_robsca, headers='keys', tablefmt='pretty'))
 
 # %%
 # Setting up and fitting for variance testing
+threshold = 0.01
+variance_df, selected_features = helper.variance_testing(scaled_data, threshold)
 threshold = 0.05
-selector = VarianceThreshold(threshold=threshold)
-_ = selector.fit_transform(scaled_data)
+variance_df, selected_features = helper.variance_testing(scaled_data, threshold)
 
 #%%
-# Getting variances
-variances = selector.variances_
-variance_df = pd.DataFrame({'features': scaled_data.columns, 'variances': variances})
-variance_df = variance_df.sort_values(by='variances', ascending=False)
-selected_features = scaled_data.columns[selector.get_support(indices=True)]
 # Manually retaining specific features
 manually_retained_features = ['Continent_Asia', 'Continent_Africa', 'Continent_Australia and Oceania', 'Gen_other']
 final_features = list(set(selected_features).union(manually_retained_features))
@@ -358,8 +351,8 @@ plt.ylabel('Feature variance')
 plt.title('Feature variance comparison')
 plt.legend()
 plt.tight_layout()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/VT.png')
-# plt.show()
+plt.show()
+plt.close()
 
 #%%
 # Checking the correlation matrix using Spearman's
@@ -377,16 +370,16 @@ sns.heatmap(
 )
 plt.title('')
 plt.xticks(rotation=90)
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/SpCorr.png')
-# plt.show()
+plt.show()
+plt.close()
 
 # %%
-# Setting var threshold for very strong
+# Setting threshold for very strong
 vs_threshold = 0.8
 mask = np.triu(np.ones(vs_corr.shape), k=1)
 
 # %%
-# Identifying attributes with very strong correlation and getting their variance
+# Identifying attributes with very strong correlation
 vs_corr_pairs, features_to_drop_vs = helper.drop_high_corr_features(vs_corr,
                                                                     vs_threshold,
                                                                     variance_df)
@@ -442,8 +435,8 @@ plt.colorbar(label=f'Scaled {feature_name} feature')
 plt.xlabel('MDS1')
 plt.ylabel('MDS2')
 plt.title(f'2D MDS projection with coloring by {feature_name}')
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/MDS_2D.png')
+plt.show()
+plt.close()
 
 # %%
 # Applying 3D MDS to visualize the data
@@ -455,11 +448,11 @@ scat = ax.scatter(data_3d[:, 0], data_3d[:, 1], data_3d[:, 2], c=target_variable
 cbar = fig.colorbar(scat, ax=ax, shrink=0.5, aspect=10)
 cbar.set_label('Robustly scaled version of Age')
 plt.title('3D MDS projection')
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/MDS_3D_v2.png')
+plt.show()
+plt.close()
 
 # %%
-# Locating outliers in the 2D plot w/ more than 3 sds from the mean
+# Locating outliers in the 2D plot w/ more than 3 stds from the mean
 distances_2 = np.sqrt(np.sum(data_2d ** 2, axis=1))
 threshold_2 = distances_2.mean() + 3 * distances_2.std()
 outlier_indices_2 = np.where(distances_2 > threshold_2)[0]
@@ -467,7 +460,7 @@ print(f"Outlier Indices: {outlier_indices_2}")
 print(f"Outlier Distances: {distances_2[outlier_indices_2]}")
 
 # %%
-# Locating outliers in the 3D plot w/ more than 3 sds from the mean
+# Locating outliers in the 3D plot w/ more than 3 stds from the mean
 distances_3 = np.sqrt(np.sum(data_3d ** 2, axis=1))
 threshold_3 = distances_3.mean() + 3 * distances_3.std()
 outlier_indices_3 = np.where(distances_3 > threshold_3)[0]
@@ -477,13 +470,6 @@ print(f"Outlier Distances: {distances_3[outlier_indices_3]}")
 # %%
 # Investigating outlier data for outlier_indices_3, which contains all values of outlier_indices_2
 outlier_data = data_corr_final.iloc[outlier_indices_3]
-print("Summary of Outliers:")
-print(outlier_data.describe())
-for col in outlier_data.columns:
-    print(f"Column: {col}")
-    print(outlier_data[col].value_counts())
-    print(f"Max: {outlier_data[col].max()}, Min: {outlier_data[col].min()}")
-    print("-" * 50)
 same_value_columns = []
 for col in outlier_data.columns:
     unique_values = outlier_data[col].nunique()
@@ -519,12 +505,12 @@ embedding = manifold.LocallyLinearEmbedding(n_neighbors=10, n_components=2, rand
 LLE_data_2d = embedding.fit_transform(MDS_clean_data)
 plt.figure(figsize=(8, 6))
 plt.scatter(LLE_data_2d[:, 0], LLE_data_2d[:, 1], c=LLE_2D_target, cmap='Spectral', s=15)
-plt.title("LLE Projection of processed survey data")
+plt.title("LLE projection of processed survey data")
 plt.xlabel("LLE Component 1")
 plt.ylabel("LLE Component 2")
 plt.colorbar(label=f'Colored by {feature_name}')
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/LLE_2D_discuss.png')
+plt.show()
+plt.close()
 
 # %%
 # Preparing a target for 3D LLE
@@ -541,8 +527,8 @@ scat = ax.scatter(LLE_data_3d[:, 0], LLE_data_3d[:, 1], LLE_data_3d[:, 2], c=LLE
 cbar = fig.colorbar(scat, ax=ax, shrink=0.5, aspect=10, pad=0.18)
 cbar.set_label('support available')
 plt.title('3D LLE projection')
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/LLE_3D.png')
+plt.show()
+plt.close()
 
 # %%
 # Using LLE outliers for data wrangling
@@ -572,8 +558,8 @@ plt.scatter(LLE_data_2d[:, 0], LLE_data_2d[:, 1], c='lightgrey', s=15, label='In
 plt.scatter(LLE_data_2d[outliers_2d_mask, 0], LLE_data_2d[outliers_2d_mask, 1], c='red', s=20, label='Outliers')
 plt.title("Outliers in 2D LLE projection")
 plt.legend()
-# plt.show()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/LLE_inandout.png')
+plt.show()
+plt.close()
 
 # %%
 # Removing outlier entries
@@ -589,28 +575,46 @@ combined_outlier_mask = outliers_2d_removal_mask | outliers_3d_removal_mask
 total_outliers_to_remove = np.sum(combined_outlier_mask)
 print(f"Total number of entries to remove: {total_outliers_to_remove}")
 LLEed_data = MDS_clean_data[~combined_outlier_mask]
-print(f"Original dataset size: {MDS_clean_data.shape[0]}")
-print(f"Filtered dataset size: {LLEed_data.shape[0]}")
+print(f"Original dataset size: {MDS_clean_data.shape}")
+print(f"Filtered dataset size: {LLEed_data.shape}")
 
 # %%
-# Creating entity for DFS
-es = ft.EntitySet(id='SurveyData')
+# Composite DFS call from helper module planned for next iterations
+# final_features, clusters, feature_importances = helper.automated_feature_engineering_and_clustering(
+#     df=LLEed_data,
+#     entityset_name="MentalHealthSurvey",
+#     corr_threshold=0.8,
+#     min_cluster_size=10,
+#     min_samples=5
+# )
+# %%
+# DFS
+trans_primitives = [
+    "add_numeric", "subtract_numeric", "divide_numeric", "multiply_numeric"
+]
+agg_primitives = [
+    "mean", "std", "min", "max", "count"
+]
+LLEed_data['index_col'] = range(1, len(LLEed_data) + 1)
+es = ft.EntitySet(id = 'DataBase')
 es = es.add_dataframe(
     dataframe_name='TableEntity',
     dataframe=LLEed_data,
-    index='Entry_ID',
-    make_index=True
-)
+    index='index_col')
 print(es)
-
-# %%
-# Generating features with DFS
+# noinspection UnusedPrimitiveWarning
 features, feature_names = ft.dfs(entityset=es,
                                  target_dataframe_name='TableEntity',
                                  max_depth=1,
-                                 trans_primitives=['multiply_numeric', 'divide_numeric', 'absolute', 'percentile'])
+                                 trans_primitives=trans_primitives,
+                                 agg_primitives=agg_primitives
+                                 )
 data_with_dfs = features.reset_index()
-print("Number of generated features:", len(feature_names))
+print("Number of features:", len(feature_names))
+print(f"Original DFS_data shape: {data_with_dfs.shape}")
+cols_to_drop = [col for col in data_with_dfs.columns if 'index_col' in col]
+data_with_dfs = data_with_dfs.drop(columns=cols_to_drop)
+print(f"Shape of DFS_data after dropping index column: {data_with_dfs.shape}")
 
 # %%
 # Checking for NaN and inf values in the dataset
@@ -643,11 +647,11 @@ if not inf_columns_onlyNaN.empty:
 # Removing columns with NaN or inf values
 data_dfs_var = data_with_dfs_onlyNaN.dropna(axis=1)
 print(f"Original DFS_data shape: {data_with_dfs_onlyNaN.shape}")
-print(f"Shape of data after variance filtering: {data_dfs_var.shape}")
+print(f"Shape of data after removing NaN & inc columns: {data_dfs_var.shape}")
 
 # %%
 # Another iteration of variance filtering
-vari_threshold = 0.03
+vari_threshold = 0.05
 selector2 = VarianceThreshold(threshold=vari_threshold)
 _ = selector2.fit_transform(data_dfs_var)
 variances2 = selector2.variances_
@@ -658,70 +662,378 @@ final_features2 = list(set(selected_features2))
 data_DFS_var = pd.DataFrame(data_dfs_var[final_features2], columns=final_features2)
 print(f"Filtered dataset size: {data_DFS_var.shape[0], data_DFS_var.shape[1]}")
 
-#%%
-# Building the correlation matrix using Spearman's
-vs_corr_dfs = data_DFS_var.corr(method='spearman')
+# %%
+# Iterative correlation-based filtering to exclude very strongly correlated features
+data_dfs_varcor = helper.iterative_correlation_dropper(data_DFS_var, vs_threshold, variance2_df)
 
 # %%
-# Setting threshold for very strong
-# noinspection DuplicatedCode
-vs_threshold_2 = 0.8
-mask = np.triu(np.ones(vs_corr_dfs.shape), k=1)
-
-# %%
-# Identifying attributes with very strong correlation and their variance
-vs_2_corr_pairs, features_to_drop_vs_2 = helper.drop_high_corr_features(vs_corr_dfs,
-                                                                        vs_threshold_2,
-                                                                        variance2_df)
-
-# %%
-# Dropping the deselected tables
-drop_table_2 = pd.DataFrame({
-    'Very strongly correlated feature pair': [f'{pair[0]} - {pair[1]}' for pair in vs_2_corr_pairs],
-    'Feature to drop': features_to_drop_vs_2
-})
-print(tabulate.tabulate(drop_table_2, headers='keys', tablefmt='pretty'))
-
-
-# %%
-# Dropping features with very strong correlation
-data_VS_corr_2 = data_DFS_var.drop(columns=features_to_drop_vs_2)
+# Iterative correlation-based filtering to exclude strongly correlated features
+data_dfs_varcor = helper.iterative_correlation_dropper(data_dfs_varcor, s_threshold, variance2_df)
 
 # %%
 # Verifying removal
 print(f"Before dataset size: {data_DFS_var.shape[0], data_DFS_var.shape[1]}")
-print(f"After dataset size: {data_VS_corr_2.shape[0], data_VS_corr_2.shape[1]}")
-
-# %%
-# Recalculating for strong correlations
-corr_matrix_shrunken_2 = data_VS_corr_2.corr(method='spearman')
-high_corr_pairs_s2, features_to_drop_s2 = helper.drop_high_corr_features(corr_matrix_shrunken_2,
-                                                                         s_threshold,
-                                                                         variance2_df)
-drop_table_s2 = pd.DataFrame({
-    'Strongly correlated feature pair': [f'{pair[0]} - {pair[1]}' for pair in high_corr_pairs_s2],
-    'Feature to Drop': features_to_drop_s2
-})
-print(tabulate.tabulate(drop_table_s2, headers='keys', tablefmt='pretty'))
-
-# %%
-# Removing columns for strongly correlated pairs
-data_dfs_varcor = data_VS_corr_2.drop(columns=features_to_drop_s2)
-
-# %%
-# Verifying removal
-print(f"Before dataset size: {data_VS_corr_2.shape[0], data_VS_corr_2.shape[1]}")
 print(f"After dataset size: {data_dfs_varcor.shape[0], data_dfs_varcor.shape[1]}")
-
-# %
-# Saving data set to CSV
-filename = f'''C:/Users/jurda/PycharmProjects/MentalTech/data_versions/survey_afterdfs_{datetime.now().strftime(
-    "%Y%m%d_%H%M%S")}.csv'''
-data_dfs_varcor.to_csv(filename, index=False)
+# filename = f'''./data_versions/survey_afterdfs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'''
+# data_dfs_varcor.to_csv(filename, index=False)
 
 # %%
-# What was this?
-# target_variable = cluster_labels
+# Another round of scaling
+scaler2 = MinMaxScaler()
+data_dfs_scaled = scaler2.fit_transform(data_dfs_varcor)
+data_dfs_scaled = pd.DataFrame(data_dfs_scaled, columns=data_dfs_varcor.columns)
+summary_dfsmms = data_dfs_scaled.describe(include='all').transpose()
+summary_dfsmms = summary_dfsmms.drop(columns=['25%', '50%', '75%'])
+summary_dfsmms.index.name = "Fnames"
+print(tabulate.tabulate(summary_dfsmms, headers='keys', tablefmt='pretty'))
+
+# %%
+# Baseline k-means iter 01
+kmeans_01 = KMeans(n_clusters=5, random_state=44)
+labels_01 = kmeans_01.fit_predict(data_dfs_scaled)
+centers_01 = kmeans_01.cluster_centers_
+cluster_counts = pd.Series(labels_01).value_counts()
+print(cluster_counts)
+data_with_clusters = data_dfs_scaled.copy()
+data_with_clusters['Cluster'] = labels_01
+
+# %%
+# Calculating radius of k-means clusters
+radii = []
+for i, center in enumerate(centers_01):
+    # Extracting points belonging to the current cluster
+    cluster_points = data_dfs_scaled[labels_01 == i]
+    # Computing distances to the cluster center
+    distances = cdist(cluster_points, [center])
+    # Calculating the maximum radius (farthest point)
+    max_radius = distances.max()
+    radii.append(max_radius)
+print("Radii for each cluster:", radii)
+
+# %%
+# Feature importance calculation
+X = data_with_clusters.drop(columns=['Cluster'])
+y = data_with_clusters['Cluster'].astype('category')
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=43)
+model = RandomForestClassifier(random_state=41)
+model.fit(X_train, y_train)
+importances = model.feature_importances_
+importances = model.feature_importances_
+feature_importances = pd.DataFrame({
+    'features': X.columns,
+    'importance': importances
+}).sort_values(by='importance', ascending=False)
+# file_name = f'''./data_versions/survey_featimpiter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'''
+# feature_importances.to_csv(file_name, index=False)
+print(tabulate.tabulate(feature_importances.head(20), headers='keys', tablefmt='pretty'))
+
+# %%
+# QA calculation clustering
+QA_name_01 = "Base_km_5c_44"
+QA_labels_01 = labels_01
+QA_data_01 = data_dfs_scaled
+QA_cc_01 = centers_01
+QA_model_01 = kmeans_01
+QA_results = pd.DataFrame(columns=["Clustering Name", "Noise Percentage", "Weighted WSS", "Silhouette Score", "BIC"])
+QA_metrics_01 = helper.calculate_clustering_metrics(QA_name_01,
+                                                     QA_labels_01,
+                                                     QA_data_01,
+                                                     QA_cc_01,
+                                                     QA_model_01)
+QA_metrics_01_df = pd.DataFrame([QA_metrics_01])
+if QA_results.empty:
+    QA_results = QA_metrics_01_df.dropna(axis=1, how='all')
+    print(f"Initialized QA_results with the first QA entry: '{QA_metrics_01_df['Clustering Name'].iloc[0]}'.")
+else:
+    if QA_metrics_01_df['Clustering Name'].iloc[0] in QA_results['Clustering Name'].values:
+        print(f"QA entry with Clustering Name '{QA_metrics_01_df['Clustering Name'].iloc[0]}' already exists.")
+    else:
+        QA_metrics_01_df = QA_metrics_01_df.dropna(axis=1, how='all')
+        QA_results = pd.concat([QA_results, QA_metrics_01_df], ignore_index=True)
+        print(f"Added new QA entry for Clustering Name '{QA_metrics_01_df['Clustering Name'].iloc[0]}'.")
+
+# %%
+# Exploring the data to get information about ranges (and a possible further round of scaling)
+summary_df = data_dfs_scaled.describe(include='all').transpose()
+summary_df = summary_df.drop(columns=['25%', '50%', '75%'])
+summary_df.index.name = "Featnames"
+# print(tabulate.tabulate(summary_df, headers='keys', tablefmt='pretty'))
+summary_df['range'] = summary_df['max'] - summary_df['min']
+sorted_summary = summary_df.sort_values(by='range', ascending=False)
+sorted_summary = sorted_summary.drop(columns=['std', 'count'])
+largest_ranges = sorted_summary.head(10)
+print("Features with the 10 Largest Ranges:")
+print(tabulate.tabulate(largest_ranges, headers='keys', tablefmt='pretty'))
+
+# %%
+selected_components = set()
+selected_features = []
+for _, row in feature_importances.iterrows():
+    feature_name = row['features']
+    feature_importance = row['importance']
+    components = set(feature_name.replace("*", "+").replace("-", "+").split(" + "))
+    if not components & selected_components:
+        selected_features.append(feature_name)
+        selected_components.update(components)
+    if len(selected_features) == 7:
+        break
+print("Selected features:", selected_features)
+
+# %%
+# Building the main df with the top 7 selected attributes based on feature importance
+existing_features = [feature for feature in selected_features if feature in data_dfs_scaled.columns]
+filtered_data = data_dfs_scaled[existing_features]
+summary_dfsfilt = filtered_data.describe(include='all').transpose()
+summary_dfsfilt = summary_dfsfilt.drop(columns=['25%', '50%', '75%'])
+summary_dfsfilt.index.name = "Filtnames"
+print(tabulate.tabulate(summary_dfsfilt, headers='keys', tablefmt='pretty'))
+
+# %%
+# DBSCANning
+X = filtered_data.values
+dbscan_clusterer = DBSCAN(eps=0.5, min_samples=5)
+dbscan_clusterer.fit(X)
+labels_DBSCAN = dbscan_clusterer.labels_
+label_map = {
+    -1: 'Noise'
+}
+categories = [label_map.get(label, f'Cluster {label}') for label in labels_DBSCAN]
+data_with_DBSCAN = filtered_data.copy()
+data_with_DBSCAN['Cluster'] = labels_DBSCAN
+num_noise = np.sum(labels_DBSCAN == -1)
+print(f"Noise points: {num_noise}")
+cluster_counts = pd.Series(labels).value_counts()
+print("Cluster Summary:")
+print(cluster_counts)
+
+# %%
+# Adding DBSCAN results to QA table
+QA_name_02 = "DBSCAN_eps0.5_minsam5"
+QA_labels_02 = labels_DBSCAN
+QA_data_02 = filtered_data
+clusters_DBSCAN = data_with_DBSCAN[data_with_DBSCAN['Cluster'] != -1]
+cluster_centers_DBSCAN = clusters_DBSCAN.groupby('Cluster').mean()
+QA_cc_02 = cluster_centers_DBSCAN
+QA_model_02 = dbscan_clusterer
+QA_metrics_02 = helper.calculate_clustering_metrics(QA_name_02,
+                                                     QA_labels_02,
+                                                     QA_data_02,
+                                                     QA_cc_02,
+                                                     QA_model_02)
+QA_metrics_02_df = pd.DataFrame([QA_metrics_02])
+if QA_results.empty:
+    QA_results = QA_metrics_02_df.dropna(axis=1, how='all')
+    print(f"Initialized QA_results with the first QA entry: '{QA_metrics_02_df['Clustering Name'].iloc[0]}'.")
+else:
+    if QA_metrics_02_df['Clustering Name'].iloc[0] in QA_results['Clustering Name'].values:
+        print(f"QA entry with Clustering Name '{QA_metrics_02_df['Clustering Name'].iloc[0]}' already exists.")
+    else:
+        QA_metrics_02_df = QA_metrics_02_df.dropna(axis=1, how='all')
+        QA_results = pd.concat([QA_results, QA_metrics_02_df], ignore_index=True)
+        print(f"Added new QA entry for Clustering Name '{QA_metrics_02_df['Clustering Name'].iloc[0]}'.")
+
+# %%
+# Print description of clusters
+print(data_with_DBSCAN['Cluster'].describe())
+
+# %%
+# HDBSCANning
+X2 = filtered_data.values
+clusterer2 = HDBSCAN(min_cluster_size=10, min_samples=15, cluster_selection_epsilon=0.0)
+clusterer2.fit(X2)
+labels_HDBSCAN = clusterer2.labels_
+probabilities_HDBSCAN = clusterer2.probabilities_
+label_map = {
+    -1: 'Noise',
+    -2: 'Infinite Values',
+    -3: 'Missing Values'
+}
+categories = [label_map.get(label, f'Cluster {label}') for label in labels_HDBSCAN]
+data_with_HDBSCAN = filtered_data.copy()
+data_with_HDBSCAN['Cluster'] = labels_HDBSCAN
+if probabilities_HDBSCAN is not None:
+    data_with_HDBSCAN['Probability'] = probabilities_HDBSCAN
+num_noise = np.sum(labels_HDBSCAN == -1)
+num_infinite = np.sum(labels_HDBSCAN == -2)
+num_missing = np.sum(labels_HDBSCAN == -3)
+print(f"Noise points: {num_noise}")
+print(f"Entries with infinite values: {num_infinite}")
+print(f"Entries with missing values: {num_missing}")
+cluster_counts = pd.Series(labels_HDBSCAN).value_counts()
+print("Cluster summary:")
+print(cluster_counts)
+print("Cluster size range:", cluster_counts.min(), "to", cluster_counts.max())
+
+# %%
+# Probability check
+print(data_with_HDBSCAN['Cluster'].describe())
+print(data_with_HDBSCAN['Probability'].describe())
+unique_prob = np.unique(probabilities_HDBSCAN)
+count_zero_prob = (data_with_HDBSCAN['Probability'] == 0).sum()
+count_less_than_0_9 = (data_with_HDBSCAN['Probability'] < 0.9).sum()
+count_less_than_0_9_but_more_than_0 = count_less_than_0_9 - count_zero_prob
+print(f"Number of entries with probability less than 0.9 (excluding noise points): {count_less_than_0_9_but_more_than_0}")
+
+# %%
+# Adding first HDBSCAN results to QA table
+QA_name_03 = "HDBSCAN_eps0_minsam15_minclsize10"
+QA_labels_03 = labels_HDBSCAN
+QA_data_03 = filtered_data
+clusters_HDBSCAN = filtered_data[data_with_HDBSCAN['Cluster'] != -1]
+cluster_centers_HDBSCAN = clusters_HDBSCAN.groupby(data_with_HDBSCAN['Cluster']).mean()
+# clusters_HDBSCAN = data_with_HDBSCAN[data_with_HDBSCAN['Cluster'] != -1]
+# cluster_centers_HDBSCAN = clusters_HDBSCAN.groupby('Cluster').mean()
+QA_cc_03= cluster_centers_HDBSCAN
+QA_model_03 = clusterer2
+QA_metrics_03 = helper.calculate_clustering_metrics(QA_name_03,
+                                                     QA_labels_03,
+                                                     QA_data_03,
+                                                     QA_cc_03,
+                                                     QA_model_03)
+QA_metrics_03_df = pd.DataFrame([QA_metrics_03])
+if QA_results.empty:
+    QA_results = QA_metrics_03_df.dropna(axis=1, how='all')
+    print(f"Initialized QA_results with the first QA entry: '{QA_metrics_03_df['Clustering Name'].iloc[0]}'.")
+else:
+    if QA_metrics_03_df['Clustering Name'].iloc[0] in QA_results['Clustering Name'].values:
+        print(f"QA entry with clustering '{QA_metrics_03_df['Clustering Name'].iloc[0]}' already exists.")
+    else:
+        QA_metrics_03_df = QA_metrics_03_df.dropna(axis=1, how='all')
+        QA_results = pd.concat([QA_results, QA_metrics_03_df], ignore_index=True)
+        print(f"Added new QA entry for clustering '{QA_metrics_03_df['Clustering Name'].iloc[0]}'.")
+
+# %%
+# HDBSCANning (with mcs 50)
+X3 = filtered_data.values
+clusterer3 = HDBSCAN(min_cluster_size=50, min_samples=15, cluster_selection_epsilon=0.0)
+clusterer3.fit(X3)
+labels_HDBSCAN_2 = clusterer3.labels_
+probabilities_HDBSCAN_2 = clusterer3.probabilities_
+label_map = {
+    -1: 'Noise',
+    -2: 'Infinite Values',
+    -3: 'Missing Values'
+}
+categories = [label_map.get(label, f'Cluster {label}') for label in labels_HDBSCAN_2]
+data_with_HDBSCAN_2 = filtered_data.copy()
+data_with_HDBSCAN_2['Cluster'] = labels_HDBSCAN_2
+if probabilities_HDBSCAN_2 is not None:
+    data_with_HDBSCAN_2['Probability'] = probabilities_HDBSCAN_2
+num_noise = np.sum(labels_HDBSCAN_2 == -1)
+num_infinite = np.sum(labels_HDBSCAN_2 == -2)
+num_missing = np.sum(labels_HDBSCAN_2 == -3)
+print(f"Noise points: {num_noise}")
+print(f"Entries with infinite values: {num_infinite}")
+print(f"Entries with missing values: {num_missing}")
+cluster_counts = pd.Series(labels_HDBSCAN_2).value_counts()
+print("Cluster Summary:")
+print(cluster_counts)
+print("Cluster size range:", cluster_counts.min(), "to", cluster_counts.max())
+print(data_with_HDBSCAN_2['Cluster'].describe())
+print(data_with_HDBSCAN_2['Probability'].describe())
+unique_prob = np.unique(probabilities_HDBSCAN)
+count_zero_prob = (data_with_HDBSCAN_2['Probability'] == 0).sum()
+count_less_than_0_9 = (data_with_HDBSCAN_2['Probability'] < 0.9).sum()
+count_less_than_0_9_but_more_than_0 = count_less_than_0_9 - count_zero_prob
+print(f"Number of entries with probability less than 0.9 (excluding noise points): {count_less_than_0_9_but_more_than_0}")
+QA_name_04 = "HDBSCAN_eps0_minsam15_minclsize50"
+QA_labels_04 = labels_HDBSCAN_2
+QA_data_04 = filtered_data
+clusters_HDBSCAN_2 = filtered_data[data_with_HDBSCAN_2['Cluster'] != -1]
+cluster_centers_HDBSCAN_2 = clusters_HDBSCAN_2.groupby(data_with_HDBSCAN_2['Cluster']).mean()
+QA_cc_04 = cluster_centers_HDBSCAN_2
+QA_model_04 = clusterer3
+QA_metrics_04 = helper.calculate_clustering_metrics(QA_name_04,
+                                                     QA_labels_04,
+                                                     QA_data_04,
+                                                     QA_cc_04,
+                                                     QA_model_04)
+QA_metrics_04_df = pd.DataFrame([QA_metrics_04])
+if QA_results.empty:
+    QA_results = QA_metrics_04_df.dropna(axis=1, how='all')
+    print(f"Initialized QA_results with the first QA entry: '{QA_metrics_04_df['Clustering Name'].iloc[0]}'.")
+else:
+    if QA_metrics_04_df['Clustering Name'].iloc[0] in QA_results['Clustering Name'].values:
+        print(f"QA entry with clustering '{QA_metrics_04_df['Clustering Name'].iloc[0]}' already exists.")
+    else:
+        QA_metrics_04_df = QA_metrics_04_df.dropna(axis=1, how='all')
+        QA_results = pd.concat([QA_results, QA_metrics_04_df], ignore_index=True)
+        print(f"Added new QA entry for clustering '{QA_metrics_04_df['Clustering Name'].iloc[0]}'.")
+
+# %%
+# HDBSCANning (with mcs 100)
+X4 = filtered_data.values
+clusterer4 = HDBSCAN(min_cluster_size=100, min_samples=15, cluster_selection_epsilon=0.0)
+clusterer4.fit(X4)
+labels_HDBSCAN_3 = clusterer4.labels_
+probabilities_HDBSCAN_3 = clusterer4.probabilities_
+label_map = {
+    -1: 'Noise',
+    -2: 'Infinite Values',
+    -3: 'Missing Values'
+}
+categories = [label_map.get(label, f'Cluster {label}') for label in labels_HDBSCAN_3]
+data_with_HDBSCAN_3 = filtered_data.copy()
+data_with_HDBSCAN_3['Cluster'] = labels_HDBSCAN_3
+if probabilities_HDBSCAN_3 is not None:
+    data_with_HDBSCAN_3['Probability'] = probabilities_HDBSCAN_3
+num_noise = np.sum(labels_HDBSCAN_3 == -1)
+num_infinite = np.sum(labels_HDBSCAN_3 == -2)
+num_missing = np.sum(labels_HDBSCAN_3 == -3)
+print(f"Noise points: {num_noise}")
+print(f"Entries with infinite values: {num_infinite}")
+print(f"Entries with missing values: {num_missing}")
+cluster_counts = pd.Series(labels_HDBSCAN_3).value_counts()
+print("Cluster Summary:")
+print(cluster_counts)
+print("Cluster size range:", cluster_counts.min(), "to", cluster_counts.max())
+print(data_with_HDBSCAN_3['Cluster'].describe())
+print(data_with_HDBSCAN_3['Probability'].describe())
+unique_prob = np.unique(probabilities_HDBSCAN_3)
+count_zero_prob = (data_with_HDBSCAN_3['Probability'] == 0).sum()
+count_less_than_0_9 = (data_with_HDBSCAN_3['Probability'] < 0.9).sum()
+count_less_than_0_9_but_more_than_0 = count_less_than_0_9 - count_zero_prob
+print(f"Number of entries with probability less than 0.9 (excluding noise points): {count_less_than_0_9_but_more_than_0}")
+QA_name_05 = "HDBSCAN_eps0_minsam15_minclsize100"
+QA_labels_05 = labels_HDBSCAN_3
+QA_data_05 = filtered_data
+clusters_HDBSCAN_3 = filtered_data[data_with_HDBSCAN_3['Cluster'] != -1]
+cluster_centers_HDBSCAN_3 = clusters_HDBSCAN_3.groupby(data_with_HDBSCAN_3['Cluster']).mean()
+QA_cc_05 = cluster_centers_HDBSCAN_3
+QA_model_05 = clusterer4
+QA_metrics_05 = helper.calculate_clustering_metrics(QA_name_05,
+                                                     QA_labels_05,
+                                                     QA_data_05,
+                                                     QA_cc_05,
+                                                     QA_model_05)
+QA_metrics_05_df = pd.DataFrame([QA_metrics_05])
+if QA_results.empty:
+    QA_results = QA_metrics_05_df.dropna(axis=1, how='all')
+    print(f"Initialized QA_results with the first QA entry: '{QA_metrics_05_df['Clustering Name'].iloc[0]}'.")
+else:
+    if QA_metrics_05_df['Clustering Name'].iloc[0] in QA_results['Clustering Name'].values:
+        print(f"QA entry with clustering '{QA_metrics_05_df['Clustering Name'].iloc[0]}' already exists.")
+    else:
+        QA_metrics_05_df = QA_metrics_05_df.dropna(axis=1, how='all')
+        QA_results = pd.concat([QA_results, QA_metrics_05_df], ignore_index=True)
+        print(f"Added new QA entry for clustering '{QA_metrics_05_df['Clustering Name'].iloc[0]}'.")
+# QA_file_name = f'''./data_versions/qa_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'''
+# QA_results.to_csv(QA_file_name, index=False)
+
+# %%
+# Choosing final clustering
+data_with_HDBSCAN_2.info()
+data_without_noise = data_with_HDBSCAN_2[data_with_HDBSCAN_2['Cluster'] != -1]
+features = [col for col in data_without_noise.columns if col not in ['Cluster', 'Probability']]
+plt.figure(figsize=(12, 6))
+for feature in features:
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(x='Cluster', y=feature, data=data_without_noise)
+    plt.title(f"Distribution of {feature} by Cluster")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    # plt.show()
+plt.close()
 
 # %%
 if __name__ == '__main__':
