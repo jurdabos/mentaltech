@@ -201,7 +201,6 @@ plt.gca().xaxis.set_tick_params(labeltop=True, labelbottom=False)
 plt.xticks(rotation=45, ha='center', fontsize=9)
 plt.yticks(rotation=0, ha='right', fontsize=10)
 plt.tight_layout()
-plt.savefig('C:/Users/jurda/PycharmProjects/MentalTech/visuals/cramers.png')
 plt.show()
 plt.close()
 
@@ -304,7 +303,7 @@ data_encoded.drop(columns=categorical_columns, inplace=True, errors='ignore')
 
 # %%
 # Converting everything to float and saving the altered data table
-# data_encoded_float = data_encoded.astype('float64')
+data_encoded_float = data_encoded.astype('float64')
 # filename = f'''./data_versions/survey_afterhotenc_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'''
 # data_encoded_float.to_csv(filename, index=False)
 
@@ -802,7 +801,7 @@ data_with_DBSCAN = filtered_data.copy()
 data_with_DBSCAN['Cluster'] = labels_DBSCAN
 num_noise = np.sum(labels_DBSCAN == -1)
 print(f"Noise points: {num_noise}")
-cluster_counts = pd.Series(labels).value_counts()
+cluster_counts = pd.Series(labels_DBSCAN).value_counts()
 print("Cluster Summary:")
 print(cluster_counts)
 
